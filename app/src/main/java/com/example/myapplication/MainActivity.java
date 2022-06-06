@@ -2,57 +2,31 @@ package com.example.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Application;
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Vibrator;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.hardware.*;
 
 import java.util.Random;
-
-//public class MainActivity extends AppCompatActivity {
-//
-//    TextView tv;
-//    EditText et;
-//
-//    @Override
-//    protected void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        // this method seetContentView instantiates
-//        // all the elements that are defined in the resources
-//        // files --> objects that are created: LinearLayout
-//        // TextView, EditText, Button and also a String
-//        setContentView(R.layout.activity_main);
-//        // after a call to this method, every View described in the
-//        // layout xml file has an instance of an object
-//        tv = findViewById(R.id.mytextview);
-//        et = findViewById(R.id.myedittext);
-//    }
-//
-//    /**
-//     * this is the method associated to the Button
-//     * the definition of the method is always the same
-//     * public void nameOfTheMethod(View v) {}
-//     * ---- here, when the Button is clicked the content
-//     * of the EditText is read and copy into the TextView
-//     * @param v
-//     */
-//    public void buttonMethod(View v) {
-//        //System.out.println("======== BUTTON WAS CLICKED!! =======");
-//        String text = et.getText().toString();
-//        tv.setText(text);
-//    }
-//}
-
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 //public class MainActivity extends AppCompatActivity {
@@ -63,207 +37,305 @@ import java.util.Random;
 //    @Override
 //    protected void onCreate(Bundle savedInstanceState) {
 //        super.onCreate(savedInstanceState);
-//        myDrawing=new DrawingSpace(this);
+//        alea = new Random(System.currentTimeMillis());
+//        myDrawing = new DrawingSpace(this,alea);
 //        setContentView(R.layout.activity_main);
 //        LinearLayout ll = findViewById(R.id.ll);
 //        ll.addView(myDrawing);
-//        alea=new Random(System.currentTimeMillis());
 //    }
 //
-//    public void moveCircles(View v){
+//    /**
+//     * when the button is clicked, both circle centers will be
+//     * changed
+//     * @param v
+//     */
+//    public void moveCircles(View v) {
 //        myDrawing.changeCirclesCenters(50+alea.nextInt(600),
-//                50+alea.nextInt(600), 50+alea.nextInt(600), 50+alea.nextInt(600));
+//                50+alea.nextInt(600),
+//                50+alea.nextInt(600),
+//                50+alea.nextInt(600));
 //    }
 //
+//    public void startTimer(View v){
+//        myDrawing.counter=0;
+//        TextView timertext = (TextView) findViewById(R.id.timertext);
+//        new CountDownTimer(15000, 1000) {
 //
-//    class DrawingSpace extends View{
+//            public void onTick(long millisUntilFinished) {
+//                timertext.setText("seconds remaining: " + millisUntilFinished / 1000 + "  ");
+//            }
 //
-//        Paint style1,style2;
-//        float x1=400.0f, x2=400.0f;
-//        float y1=300.0f, y2=500.0f;
+//            public void onFinish() {
+//                timertext.setText("Time's up! Your score: " + myDrawing.counter + "  ");
+//            }
 //
-//        public DrawingSpace(Context context){
-//            super(context);
-//            initStyles();
+//        }.start();
+//    }
+//}
+//
+//class DrawingSpace extends View implements View.OnTouchListener,
+//        View.OnClickListener {
+//
+//    Random alea;
+//    Paint style1,style2;
+//    float x1 = 400.0f, x2 = 400.0f;
+//    float y1 = 300.0f, y2 = 500.0f;
+//    float xrect1 = 100.0f, yrect1 = 100.0f;
+//    int counter=0;
+//
+//    public DrawingSpace(Context context, Random alea) {
+//        super(context);
+//        this.alea = alea;
+//        init();
+//    }
+//
+//    /**
+//     * onDraw is a callback method and thus the canvas
+//     * parameter is given by the system to me (programmer)
+//     * for creating new geometric objects to be displayed
+//     * @param canvas
+//     */
+//    public void onDraw(Canvas canvas) {
+//        canvas.drawColor(Color.WHITE);
+//        //canvas.drawRect(xrect1,yrect1,xrect1+100,yrect1+100,style1);
+//        //canvas.drawRect(100,310,200,500,style2);
+//        //canvas.drawCircle(x1,y1,50,style2);
+//        canvas.drawCircle(x2,y2,70,style1);
+//        canvas.drawCircle(x2,y2,40,style1);
+//        canvas.drawCircle(x2,y2,10,style1);
+//    }
+//
+//    /**
+//     * initialization of the styles and
+//     * register this object as listener of touch and click events
+//     * on itself
+//     */
+//    public void init() {
+//        style1 = new Paint();
+//        style1.setColor(Color.BLACK);
+//        style1.setAntiAlias(true);
+//        style1.setStyle(Paint.Style.STROKE);
+//        style1.setStrokeWidth(5.0f);
+//        style2 = new Paint();
+//        style2.setColor(Color.BLUE);
+//        style2.setAntiAlias(false);
+//        style2.setStyle(Paint.Style.FILL);
+//        this.setOnClickListener(this);
+//        this.setOnTouchListener(this);
+//    }
+//
+//    public void changeCirclesCenters(float x1, float y1, float x2, float y2) {
+//        this.x1 = x1;
+//        this.x2 = x2;
+//        this.y1 = y1;
+//        this.y2 = y2;
+//        // force android to redraw the scene
+//        // invalidate() triggers a call to onDrawn()
+//        this.invalidate();
+//    }
+//
+//    public void hideCircle(Canvas canvas){
+//
+//    }
+//
+//    /**
+//     * when the finger is removed from the screen this
+//     * triggers a call to this onClick method
+//     * @param view
+//     */
+//    @Override
+//    public void onClick(View view) {
+////        style2.setColor(Color.rgb(50+alea.nextInt(200),
+////                50+alea.nextInt(200),
+////                50+alea.nextInt(200)));
+//        if(xrect1<this.x2+70 && xrect1>this.x2-70 && yrect1<this.y2+70 && yrect1>this.y2-70){
+//            counter++;
+//            changeCirclesCenters(70+alea.nextInt(600),
+//                    70+alea.nextInt(600),
+//                    70+alea.nextInt(600),
+//                    70+alea.nextInt(600));
 //        }
+//        this.invalidate();
+//    }
 //
-//        public void onDraw(Canvas canvas){
-//            canvas.drawColor(Color.WHITE);
-//            canvas.drawRect(100,100,200,300,style1);
-//            canvas.drawRect(100,310,200,500,style2);
-//            canvas.drawCircle(x1,y1,50,style2);
-//            canvas.drawCircle(x2,y2,50,style1);
-//        }
-//
-//        public void initStyles(){
-//            style1=new Paint();
-//            style1.setColor(Color.RED);
-//            style1.setAntiAlias(true);
-//            style1.setStyle(Paint.Style.STROKE);
-//            style1.setStrokeWidth(5.0f);
-//            style2 = new Paint();
-//            style2.setColor(Color.BLUE);
-//            style2.setAntiAlias(false);
-//            style2.setStyle(Paint.Style.FILL);
-//        }
-//
-//        public void changeCirclesCenters(float x1, float y1, float x2, float y2){
-//            this.x1=x1;
-//            this.x2=x2;
-//            this.y1=y1;
-//            this.y2=y2;
-//            this.invalidate();
-//        }
+//    /**
+//     * this method is called by Android as soon as one Action on the screen is
+//     * performed ACTION_DOWN (finger arrives on the screen)
+//     * ACTION_MOVE (finger slides on the screen)
+//     * ACITON_UP (finger quits the screen)
+//     * @param view
+//     * @param motionEvent
+//     * @return
+//     */
+//    @Override
+//    public boolean onTouch(View view, MotionEvent motionEvent) {
+//        xrect1 = motionEvent.getX();
+//        yrect1 = motionEvent.getY();
+//        this.invalidate();
+//        // when false is returned, the motionEvent is transmitted
+//        // to the onClick() method otherwise the motionEvent is
+//        // consumed by the onTouch() method.
+//        return false;
 //    }
 //}
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
+    private CanvasView canvas;
 
-    DrawingSpace myDrawing;
-    Random alea;
+    Random random = new Random();
+
+    private int circleRadius = 30;
+    private float circleX;
+    private float circleY;
+
+    private int circleRadius2 = 60;
+    private float circleX2;
+    private float circleY2;
+
+    private Timer timer;
+    private Handler handler;
+
+    private SensorManager sensorManager;
+    private Sensor accelerometer;
+
+    private float sensorX;
+    private float sensorY;
+    private float sensorZ;
+    private long lastSensorUpdateTime = 0;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        alea = new Random(System.currentTimeMillis());
-        myDrawing = new DrawingSpace(this,alea);
         setContentView(R.layout.activity_main);
-        LinearLayout ll = findViewById(R.id.ll);
-        ll.addView(myDrawing);
-    }
 
-    /**
-     * when the button is clicked, both circle centers will be
-     * changed
-     * @param v
-     */
-    public void moveCircles(View v) {
-        myDrawing.changeCirclesCenters(50+alea.nextInt(600),
-                50+alea.nextInt(600),
-                50+alea.nextInt(600),
-                50+alea.nextInt(600));
-    }
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(this,accelerometer,SensorManager.SENSOR_DELAY_NORMAL);
 
-    public void startTimer(View v){
-        myDrawing.counter=0;
-        TextView timertext = (TextView) findViewById(R.id.timertext);
-        new CountDownTimer(15000, 1000) {
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
 
-            public void onTick(long millisUntilFinished) {
-                timertext.setText("seconds remaining: " + millisUntilFinished / 1000 + "  ");
+        int screenWidth = size.x;
+        int screenHeight = size.y;
+
+        //circleX = screenWidth / 2 - circleRadius;
+        //circleY = screenHeight / 2 - circleRadius;
+
+        circleX = (float) (Math.random() * ((screenWidth-circleRadius)-circleRadius) + circleRadius);
+        circleY = (float) (Math.random() * ((screenHeight-circleRadius)-circleRadius) + circleRadius);
+
+        circleX2 = (float) (Math.random() * ((screenWidth-circleRadius2)-circleRadius2) + circleRadius2);
+        circleY2 = (float) (Math.random() * ((screenHeight-circleRadius2)-circleRadius2) + circleRadius2);
+
+        canvas = new CanvasView(MainActivity.this);
+        setContentView(canvas);
+
+        handler = new Handler(){
+            @Override
+            public void handleMessage(Message message){
+                canvas.invalidate();
             }
+        };
 
-            public void onFinish() {
-                timertext.setText("Time's up! Your score: " + myDrawing.counter + "  ");
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Vibrator vibor = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+                if(sensorX < 0){
+                    if(circleX<=screenWidth) {
+                        circleX += 5;
+                        if(circleX==screenWidth){vibor.vibrate(500);}
+                    }
+                } else{
+                    if(circleX>=0) {
+                        circleX -= 5;
+                        if(circleX==0){vibor.vibrate(500);}
+                    }
+                }
+
+                if(sensorY < 0){
+                    if(circleY<=screenHeight) {
+                        circleY += 5;
+                        if(circleY==screenHeight){vibor.vibrate(500);}
+                    }
+                } else{
+                    if(circleY>=0) {
+                        circleY -= 5;
+                        if(circleY==0){vibor.vibrate(500);}
+                    }
+                }
+
+                if(circleX+circleRadius>=circleX2-circleRadius2 && circleX-circleRadius<=circleX2+circleRadius2 &&
+                        circleY+circleRadius>=circleY2-circleRadius2 && circleY-circleRadius<=circleY2+circleRadius2){
+                    finish();
+                    System.exit(0);
+                }
+
+
+                //circleY--;
+                handler.sendEmptyMessage(0);
             }
-
-        }.start();
-    }
-}
-
-class DrawingSpace extends View implements View.OnTouchListener,
-        View.OnClickListener {
-
-    Random alea;
-    Paint style1,style2;
-    float x1 = 400.0f, x2 = 400.0f;
-    float y1 = 300.0f, y2 = 500.0f;
-    float xrect1 = 100.0f, yrect1 = 100.0f;
-    int counter=0;
-
-    public DrawingSpace(Context context, Random alea) {
-        super(context);
-        this.alea = alea;
-        init();
+        },0,100);
     }
 
-    /**
-     * onDraw is a callback method and thus the canvas
-     * parameter is given by the system to me (programmer)
-     * for creating new geometric objects to be displayed
-     * @param canvas
-     */
-    public void onDraw(Canvas canvas) {
-        canvas.drawColor(Color.WHITE);
-        //canvas.drawRect(xrect1,yrect1,xrect1+100,yrect1+100,style1);
-        //canvas.drawRect(100,310,200,500,style2);
-        //canvas.drawCircle(x1,y1,50,style2);
-        canvas.drawCircle(x2,y2,70,style1);
-        canvas.drawCircle(x2,y2,40,style1);
-        canvas.drawCircle(x2,y2,10,style1);
-    }
-
-    /**
-     * initialization of the styles and
-     * register this object as listener of touch and click events
-     * on itself
-     */
-    public void init() {
-        style1 = new Paint();
-        style1.setColor(Color.BLACK);
-        style1.setAntiAlias(true);
-        style1.setStyle(Paint.Style.STROKE);
-        style1.setStrokeWidth(5.0f);
-        style2 = new Paint();
-        style2.setColor(Color.BLUE);
-        style2.setAntiAlias(false);
-        style2.setStyle(Paint.Style.FILL);
-        this.setOnClickListener(this);
-        this.setOnTouchListener(this);
-    }
-
-    public void changeCirclesCenters(float x1, float y1, float x2, float y2) {
-        this.x1 = x1;
-        this.x2 = x2;
-        this.y1 = y1;
-        this.y2 = y2;
-        // force android to redraw the scene
-        // invalidate() triggers a call to onDrawn()
-        this.invalidate();
-    }
-
-    public void hideCircle(Canvas canvas){
-
-    }
-
-    /**
-     * when the finger is removed from the screen this
-     * triggers a call to this onClick method
-     * @param view
-     */
     @Override
-    public void onClick(View view) {
-//        style2.setColor(Color.rgb(50+alea.nextInt(200),
-//                50+alea.nextInt(200),
-//                50+alea.nextInt(200)));
-        if(xrect1<this.x2+70 && xrect1>this.x2-70 && yrect1<this.y2+70 && yrect1>this.y2-70){
-            counter++;
-            changeCirclesCenters(70+alea.nextInt(600),
-                    70+alea.nextInt(600),
-                    70+alea.nextInt(600),
-                    70+alea.nextInt(600));
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        Sensor mySensor = sensorEvent.sensor;
+
+        if(mySensor.getType() == Sensor.TYPE_ACCELEROMETER){
+            sensorX = sensorEvent.values[0];
+            sensorY = sensorEvent.values[1];
+            sensorZ = sensorEvent.values[2];
+
+            long currentTime = System.currentTimeMillis();
+
+            if((currentTime - lastSensorUpdateTime) > 100){
+                lastSensorUpdateTime=currentTime;
+
+                sensorX = sensorEvent.values[0];
+                sensorY = sensorEvent.values[1];
+                sensorZ = sensorEvent.values[2];
+            }
         }
-        this.invalidate();
     }
 
-    /**
-     * this method is called by Android as soon as one Action on the screen is
-     * performed ACTION_DOWN (finger arrives on the screen)
-     * ACTION_MOVE (finger slides on the screen)
-     * ACITON_UP (finger quits the screen)
-     * @param view
-     * @param motionEvent
-     * @return
-     */
     @Override
-    public boolean onTouch(View view, MotionEvent motionEvent) {
-        xrect1 = motionEvent.getX();
-        yrect1 = motionEvent.getY();
-        this.invalidate();
-        // when false is returned, the motionEvent is transmitted
-        // to the onClick() method otherwise the motionEvent is
-        // consumed by the onTouch() method.
-        return false;
+    public void onAccuracyChanged(Sensor sensor, int i) {
+
     }
+
+    private class CanvasView extends View{
+
+        private Paint pen;
+        private Paint pen2;
+
+        public CanvasView(Context context){
+            super(context);
+            setFocusable(true);
+
+            pen = new Paint();
+            pen2 = new Paint();
+        }
+
+        public void onDraw(Canvas screen){
+            pen.setStyle(Paint.Style.FILL);
+            pen.setAntiAlias(true);
+            pen.setTextSize(30f);
+
+            pen2.setStyle(Paint.Style.FILL);
+            pen2.setColor(Color.BLUE);
+            pen2.setAntiAlias(true);
+            pen2.setTextSize(30f);
+
+            screen.drawCircle(circleX, circleY, circleRadius, pen);
+            screen.drawCircle(circleX2, circleY2, circleRadius2, pen2);
+        }
+    }
+
+
 }
+
